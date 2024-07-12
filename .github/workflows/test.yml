@@ -1,0 +1,24 @@
+name: "Test action"
+on:
+  push:
+    branches:
+      - main
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up kubectl
+        uses: Azure/setup-kubectl@v1
+        with:
+          version: "v1.21.0"
+      - name: "Test action"
+        uses: ./
+        with:
+          service_name: "service-name"
+          host: "host"
+          namespace: "slh"
+          kubeconfig: "kubeconfig"
+          gh_token: "gh_token"
+          docker_image: "docker_image"
+          env_vars: "ENV_DATABASE_URL=database_url,ENV_DATABASE_USER=database_user"

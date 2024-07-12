@@ -1,0 +1,32 @@
+name: "Deploy to Kubernetes"
+description: "Deploy a Docker image to a Kubernetes cluster"
+inputs:
+  service_name:
+    description: "Service name"
+    required: true
+  host:
+    description: "Host"
+    required: true
+  namespace:
+    description: "Namespace"
+    required: true
+  kubeconfig:
+    description: "Kubeconfig"
+    required: true
+  gh_token:
+    description: "GitHub Token"
+    required: true
+  docker_image:
+    description: "Docker Image url"
+    required: true
+  env_vars:
+    description: "Environment Variables (format: ENV_NAME=value,ENV_NAME=value)"
+    required: false
+  run_mode:
+    description: "Run mode"
+    required: false
+    default: "production"
+
+runs:
+  using: "node16"
+  main: "index.js"
