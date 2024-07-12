@@ -15,6 +15,9 @@ async function run() {
     const runMode = core.getInput("run_mode");
     const dockerUsername = core.getInput("docker_username");
     const withIngress = core.getInput("with_ingress");
+    if (withIngress === "true" && !host) {
+      throw new Error("Host is required when with_ingress is true");
+    }
 
     // Set up kubeconfig if not exists in the runner machine created by the action
     if (!fs.existsSync("/home/runner/.kube")) {

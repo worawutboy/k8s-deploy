@@ -6,7 +6,7 @@ inputs:
     required: true
   host:
     description: "Host"
-    required: true
+    required: false
   namespace:
     description: "Namespace"
     required: true
