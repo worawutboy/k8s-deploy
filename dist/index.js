@@ -28071,6 +28071,9 @@ async function run() {
         const runMode = core.getInput("run_mode");
         const dockerUsername = core.getInput("docker_username");
         const withIngress = core.getInput("with_ingress");
+        if (withIngress === "true" && !host) {
+            throw new Error("Host is required when with_ingress is true");
+        }
         // Set up kubeconfig if not exists in the runner machine created by the action
         if (!fs.existsSync("/home/runner/.kube")) {
             fs.mkdirSync("/home/runner/.kube");
@@ -28138,7 +28141,6 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: ${service_name}
-  namespace: ${namespace}
   annotations:
     nginx.ingress.kubernetes.io/rewrite-target: /
 spec:
@@ -28151,6 +28153,7 @@ spec:
             backend:
               service:
                 name: ${service_name}
+                namespace: ${namespace}
                 port:
                   number: 80
 `;
