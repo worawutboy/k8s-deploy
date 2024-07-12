@@ -1,4 +1,4 @@
-name: "worawutboy/k8s-deploy@v1"
+name: "worawutboy/k8s-deploy"
 description: "Deploy a Docker image to a Kubernetes cluster"
 inputs:
   service_name:
@@ -25,6 +25,10 @@ inputs:
   env_vars:
     description: "Environment Variables (format: ENV_NAME=value,ENV_NAME=value)"
     required: false
+  with_ingress:
+    description: "With Ingress"
+    required: false
+    default: "false"
   run_mode:
     description: "Run mode"
     required: false

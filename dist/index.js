@@ -28069,6 +28069,8 @@ async function run() {
         const dockerImage = core.getInput("docker_image");
         const envVarsInput = core.getInput("env_vars");
         const runMode = core.getInput("run_mode");
+        const dockerUsername = core.getInput("docker_username");
+        const withIngress = core.getInput("with_ingress");
         // Set up kubeconfig if not exists in the runner machine created by the action
         if (!fs.existsSync("/home/runner/.kube")) {
             fs.mkdirSync("/home/runner/.kube");
@@ -28077,7 +28079,7 @@ async function run() {
         // Create namespace if it does not exist
         await exec.exec(`sh -c "kubectl get namespace ${namespace} || kubectl create namespace ${namespace}"`);
         // Create or update Docker registry secret
-        await exec.exec(`sh -c "kubectl create secret docker-registry ghcr-secret --docker-server=ghcr.io --docker-username=${process.env.GITHUB_ACTOR} --docker-password=${ghToken} --namespace=${namespace} --dry-run=client -o yaml | kubectl apply -f -"`, [], { shell: true });
+        await exec.exec(`sh -c "kubectl create secret docker-registry ghcr-secret --docker-server=ghcr.io --docker-username=${dockerUsername} --docker-password=${ghToken} --namespace=${namespace} --dry-run=client -o yaml | kubectl apply -f -"`, [], { shell: true });
         // Prepare environment variables
         const envVars = envVarsInput.split(",").map((env) => {
             const [name, value] = env.split("=");
@@ -28158,14 +28160,16 @@ spec:
         const ingressFile = path.join("/home/runner/ingress.yaml");
         fs.writeFileSync(deploymentFile, deploymentYaml);
         fs.writeFileSync(serviceFile, serviceYaml);
-        fs.writeFileSync(ingressFile, ingressYaml);
+        if (withIngress === "true")
+            fs.writeFileSync(ingressFile, ingressYaml);
         if (runMode === "dry-run") {
             // Output YAML files
             core.info("Deployment YAML:");
             core.info(deploymentYaml);
             core.info("Service YAML:");
             core.info(serviceYaml);
-            core.info("Ingress YAML:");
+            if (withIngress === "true")
+                core.info("Ingress YAML:");
             core.info(ingressYaml);
             core.info("Dry run mode, exiting...");
             return;
@@ -28173,7 +28177,8 @@ spec:
         // Apply Kubernetes manifests
         await exec.exec(`sh -c "kubectl apply -f ${deploymentFile}"`);
         await exec.exec(`sh -c "kubectl apply -f ${serviceFile}"`);
-        await exec.exec(`sh -c "kubectl apply -f ${ingressFile}"`);
+        if (withIngress === "true")
+            await exec.exec(`sh -c "kubectl apply -f ${ingressFile}"`);
     }
     catch (error) {
         core.setFailed(error.message);
