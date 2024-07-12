@@ -25,15 +25,12 @@ async function run() {
 
     // Create namespace if it does not exist
     await exec.exec(
-      `kubectl create namespace ${namespace} --dry-run=client -o yaml | kubectl apply -f -`
+      `if ! kubectl get namespace ${namespace}; then kubectl create namespace ${namespace}; fi`
     );
 
     // Create or update Docker registry secret
     await exec.exec(
-      `if ! kubectl get secret ghcr-secret --namespace=${namespace};then
-            kubectl create secret docker-registry ghcr-secret --docker-server=ghcr.io --docker-username=${process.env.GITHUB_ACTOR} --docker-password=${ghToken} --namespace=${namespace} --dry-run=client -o yaml | kubectl apply -f -
-       fi
-        `
+      `kubectl create secret docker-registry ghcr-secret --docker-server=ghcr.io --docker-username=${process.env.GITHUB_ACTOR} --docker-password=${ghToken} --namespace=${namespace} --dry-run=client -o yaml | kubectl apply -f -`
     );
 
     // Prepare environment variables

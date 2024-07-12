@@ -18,7 +18,7 @@ jobs:
           service_name: "service-name"
           host: "host"
           namespace: "slh"
-          kubeconfig: "kubeconfig"
+          kubeconfig: "dGVzdAo="
           gh_token: "gh_token"
           docker_image: "docker_image"
           env_vars: "ENV_DATABASE_URL=database_url,ENV_DATABASE_USER=database_user"
