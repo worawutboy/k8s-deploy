@@ -30,7 +30,9 @@ async function run() {
 
     // Create or update Docker registry secret
     await exec.exec(
-      `kubectl create secret docker-registry ghcr-secret --docker-server=ghcr.io --docker-username=${process.env.GITHUB_ACTOR} --docker-password=${ghToken} --namespace=${namespace} --dry-run=client -o yaml | kubectl apply -f -`
+      `sh -c "kubectl create secret docker-registry ghcr-secret --docker-server=ghcr.io --docker-username=${process.env.GITHUB_ACTOR} --docker-password=${ghToken} --namespace=${namespace} --dry-run=client -o yaml | kubectl apply -f -"`,
+      [],
+      { shell: true }
     );
 
     // Prepare environment variables
@@ -134,17 +136,9 @@ spec:
       return;
     }
     // Apply Kubernetes manifests
-    await exec.exec(`kubectl apply -f ${deploymentFile}`);
-    await exec.exec(`kubectl apply -f ${serviceFile}`);
-    await exec.exec(`kubectl apply -f ${ingressFile}`);
-
-    // Set image and rollout deployment
-    await exec.exec(
-      `kubectl set image deployment/${service_name} ${service_name}=${dockerImage} --namespace=${namespace}`
-    );
-    await exec.exec(
-      `kubectl rollout status deployment/${service_name} --namespace=${namespace}`
-    );
+    await exec.exec(`sh -c "kubectl apply -f ${deploymentFile}"`);
+    await exec.exec(`sh -c "kubectl apply -f ${serviceFile}"`);
+    await exec.exec(`sh -c "kubectl apply -f ${ingressFile}"`);
   } catch (error: any) {
     core.setFailed(error.message);
   }
