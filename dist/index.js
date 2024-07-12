@@ -28075,7 +28075,7 @@ async function run() {
         }
         fs.writeFileSync("/home/runner/.kube/config", Buffer.from(kubeconfig, "base64").toString("utf8"));
         // Create namespace if it does not exist
-        await exec.exec(`kubectl get namespace ${namespace} || kubectl create namespace ${namespace}`, [], { shell: true });
+        await exec.exec(`sh -c "kubectl get namespace ${namespace} || kubectl create namespace ${namespace}"`);
         // Create or update Docker registry secret
         await exec.exec(`kubectl create secret docker-registry ghcr-secret --docker-server=ghcr.io --docker-username=${process.env.GITHUB_ACTOR} --docker-password=${ghToken} --namespace=${namespace} --dry-run=client -o yaml | kubectl apply -f -`);
         // Prepare environment variables
