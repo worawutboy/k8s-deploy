@@ -1,4 +1,4 @@
-name: "Deploy to Kubernetes"
+name: "worawutboy/k8s-deploy@v1"
 description: "Deploy a Docker image to a Kubernetes cluster"
 inputs:
   service_name:
