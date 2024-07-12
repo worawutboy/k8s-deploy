@@ -14,7 +14,10 @@ async function run() {
     const envVarsInput = core.getInput("env_vars");
     const runMode = core.getInput("run_mode");
 
-    // Set up kubeconfig
+    // Set up kubeconfig if not exists in the runner machine created by the action
+    if (!fs.existsSync("/home/runner/.kube")) {
+      fs.mkdirSync("/home/runner/.kube");
+    }
     fs.writeFileSync(
       "/home/runner/.kube/config",
       Buffer.from(kubeconfig, "base64").toString("utf8")
