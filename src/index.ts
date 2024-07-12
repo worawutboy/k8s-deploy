@@ -13,6 +13,7 @@ async function run() {
     const dockerImage = core.getInput("docker_image");
     const envVarsInput = core.getInput("env_vars");
     const runMode = core.getInput("run_mode");
+    const dockerUsername = core.getInput("docker_username");
 
     // Set up kubeconfig if not exists in the runner machine created by the action
     if (!fs.existsSync("/home/runner/.kube")) {
@@ -30,7 +31,7 @@ async function run() {
 
     // Create or update Docker registry secret
     await exec.exec(
-      `sh -c "kubectl create secret docker-registry ghcr-secret --docker-server=ghcr.io --docker-username=${process.env.GITHUB_ACTOR} --docker-password=${ghToken} --namespace=${namespace} --dry-run=client -o yaml | kubectl apply -f -"`,
+      `sh -c "kubectl create secret docker-registry ghcr-secret --docker-server=ghcr.io --docker-username=${dockerUsername} --docker-password=${ghToken} --namespace=${namespace} --dry-run=client -o yaml | kubectl apply -f -"`,
       [],
       { shell: true }
     );

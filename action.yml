@@ -16,6 +16,9 @@ inputs:
   gh_token:
     description: "GitHub Token"
     required: true
+  docker_username:
+    description: "Docker Username"
+    required: true
   docker_image:
     description: "Docker Image url"
     required: true
