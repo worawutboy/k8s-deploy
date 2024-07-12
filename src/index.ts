@@ -25,7 +25,9 @@ async function run() {
 
     // Create namespace if it does not exist
     await exec.exec(
-      `if ! kubectl get namespace ${namespace}; then kubectl create namespace ${namespace}; fi`
+      `kubectl get namespace ${namespace} || kubectl create namespace ${namespace}`,
+      [],
+      { shell: true }
     );
 
     // Create or update Docker registry secret
