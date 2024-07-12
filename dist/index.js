@@ -28152,19 +28152,30 @@ spec:
             pathType: Prefix
             backend:
               service:
-                name: ${service_name}
-                namespace: ${namespace}
+                name: ${service_name}-${namespace}
                 port:
                   number: 80
+`;
+        const bridgeSeviceYaml = `
+apiVersion: v1
+kind: Service
+metadata:
+    name: ${service_name}-${namespace}
+spec:
+  type: ExternalName
+  externalName: ${service_name}.${namespace}.svc.cluster.local
 `;
         // Write YAML files to disk
         const deploymentFile = path.join("/home/runner/deployment.yaml");
         const serviceFile = path.join("/home/runner/service.yaml");
         const ingressFile = path.join("/home/runner/ingress.yaml");
+        const bridgeServiceFile = path.join("/home/runner/bridge-service.yaml");
         fs.writeFileSync(deploymentFile, deploymentYaml);
         fs.writeFileSync(serviceFile, serviceYaml);
-        if (withIngress === "true")
+        if (withIngress === "true") {
             fs.writeFileSync(ingressFile, ingressYaml);
+            fs.writeFileSync(bridgeServiceFile, bridgeSeviceYaml);
+        }
         if (runMode === "dry-run") {
             // Output YAML files
             core.info("Deployment YAML:");
@@ -28180,8 +28191,10 @@ spec:
         // Apply Kubernetes manifests
         await exec.exec(`sh -c "kubectl apply -f ${deploymentFile}"`);
         await exec.exec(`sh -c "kubectl apply -f ${serviceFile}"`);
-        if (withIngress === "true")
+        if (withIngress === "true") {
+            await exec.exec(`sh -c "kubectl apply -f ${bridgeServiceFile}"`);
             await exec.exec(`sh -c "kubectl apply -f ${ingressFile}"`);
+        }
     }
     catch (error) {
         core.setFailed(error.message);
