@@ -28095,7 +28095,7 @@ async function run() {
         let secretCommand = `kubectl create secret generic ${secretName} --namespace=${namespace}`;
         envVars.forEach((envVar) => {
             const { name, value } = envVar;
-            secretCommand += ` --from-literal=${name}=${value}`;
+            secretCommand += ` --from-literal=${name}='${value.replace(/'/g, "'\\''")}'`;
         });
         // Execute the command to create the secret
         await exec.exec(`sh -c "${secretCommand} --dry-run=client -o yaml | kubectl apply -f -"`, [], { shell: true });

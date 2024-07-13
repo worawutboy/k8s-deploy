@@ -58,7 +58,10 @@ async function run() {
 
     envVars.forEach((envVar: any) => {
       const { name, value } = envVar;
-      secretCommand += ` --from-literal=${name}=${value}`;
+      secretCommand += ` --from-literal=${name}='${value.replace(
+        /'/g,
+        "'\\''"
+      )}'`;
     });
 
     // Execute the command to create the secret
