@@ -51,7 +51,7 @@ async function run() {
     const secretName = `env-vars-${service_name}`;
     // Delete existing secret if it exists
     await exec.exec(
-      `kubectl delete secret ${secretName} --namespace=${namespace} || true`
+      `sh -c "kubectl delete secret ${secretName} --namespace=${namespace} || true"`
     );
 
     let secretCommand = `kubectl create secret generic ${secretName} --namespace=${namespace}`;
