@@ -28094,7 +28094,7 @@ async function run() {
         await exec.exec(`sh -c "kubectl delete secret ${secretName} --namespace=${namespace} || true"`);
         let secretCommand = `kubectl create secret generic ${secretName} --namespace=${namespace}`;
         envVars.forEach((envVar) => {
-            const [name, value] = envVar.split("=");
+            const { name, value } = envVar;
             secretCommand += ` --from-literal=${name}=${value}`;
         });
         // Execute the command to create the secret
