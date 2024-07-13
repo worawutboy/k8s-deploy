@@ -28141,6 +28141,7 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: ${service_name}
+  namespace: ${namespace}
   annotations:
     nginx.ingress.kubernetes.io/rewrite-target: /
 spec:
@@ -28152,18 +28153,9 @@ spec:
             pathType: Prefix
             backend:
               service:
-                name: ${service_name}-${namespace}
+                name: ${service_name}
                 port:
                   number: 80
-`;
-        const bridgeSeviceYaml = `
-apiVersion: v1
-kind: Service
-metadata:
-    name: ${service_name}-${namespace}
-spec:
-  type: ExternalName
-  externalName: ${service_name}.${namespace}.svc.cluster.local
 `;
         // Write YAML files to disk
         const deploymentFile = path.join("/home/runner/deployment.yaml");
@@ -28174,7 +28166,6 @@ spec:
         fs.writeFileSync(serviceFile, serviceYaml);
         if (withIngress === "true") {
             fs.writeFileSync(ingressFile, ingressYaml);
-            fs.writeFileSync(bridgeServiceFile, bridgeSeviceYaml);
         }
         if (runMode === "dry-run") {
             // Output YAML files
@@ -28192,7 +28183,6 @@ spec:
         await exec.exec(`sh -c "kubectl apply -f ${deploymentFile}"`);
         await exec.exec(`sh -c "kubectl apply -f ${serviceFile}"`);
         if (withIngress === "true") {
-            await exec.exec(`sh -c "kubectl apply -f ${bridgeServiceFile}"`);
             await exec.exec(`sh -c "kubectl apply -f ${ingressFile}"`);
         }
     }
