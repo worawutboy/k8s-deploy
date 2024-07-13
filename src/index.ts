@@ -47,8 +47,13 @@ async function run() {
       .filter((line: any) => line.trim() !== "")
       .map((line: any) => line.trim());
 
-    // Create a secret for the environment variables
+    // Create or update the secret for the environment variables
     const secretName = `env-vars-${service_name}`;
+    // Delete existing secret if it exists
+    await exec.exec(
+      `kubectl delete secret ${secretName} --namespace=${namespace} || true`
+    );
+
     let secretCommand = `kubectl create secret generic ${secretName} --namespace=${namespace}`;
 
     envVars.forEach((envVar: any) => {
@@ -142,7 +147,6 @@ spec:
     const deploymentFile = path.join("/home/runner/deployment.yaml");
     const serviceFile = path.join("/home/runner/service.yaml");
     const ingressFile = path.join("/home/runner/ingress.yaml");
-    const bridgeServiceFile = path.join("/home/runner/bridge-service.yaml");
     fs.writeFileSync(deploymentFile, deploymentYaml);
     fs.writeFileSync(serviceFile, serviceYaml);
     if (withIngress === "true") {
