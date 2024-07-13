@@ -52,7 +52,11 @@ async function run() {
     let secretCommand = `kubectl create secret generic ${secretName} --namespace=${namespace}`;
 
     envVars.forEach((envVar: any) => {
-      secretCommand += ` --from-literal=${envVar}`;
+      const [name, value] = envVar.split("=");
+      secretCommand += ` --from-literal=${name}=${JSON.stringify(value).slice(
+        1,
+        -1
+      )}`;
     });
 
     // Execute the command to create the secret
