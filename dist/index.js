@@ -28086,8 +28086,16 @@ async function run() {
         // Prepare environment variables
         const envVars = envVarsInput.split(",").map((env) => {
             const [name, value] = env.split("=");
-            return { name: name.replace("ENV_", ""), value };
+            return { name, value };
         });
+        // Create a secret for the environment variables
+        const secretName = `env-vars-${service_name}`;
+        let secretCommand = `kubectl create secret generic ${secretName} --namespace=${namespace}`;
+        envVars.forEach((envVar) => {
+            secretCommand += ` --from-literal=${envVar.name}=${envVar.value}`;
+        });
+        // Execute the command to create the secret
+        await exec.exec(`sh -c "${secretCommand} --dry-run=client -o yaml | kubectl apply -f -"`, [], { shell: true });
         // Create deployment YAML
         const deploymentYaml = `
 apiVersion: apps/v1
@@ -28114,10 +28122,9 @@ spec:
           image: ${dockerImage}
           ports:
             - containerPort: 3000
-          env:
-${envVars
-            .map((env) => `            - name: ${env.name}\n              value: '${env.value}'`)
-            .join("\n")}
+          envFrom:
+            - secretRef:
+                name: ${secretName}
 `;
         // Create service YAML
         const serviceYaml = `
