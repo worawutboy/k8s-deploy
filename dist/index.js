@@ -28067,7 +28067,7 @@ async function run() {
         const kubeconfig = core.getInput("kubeconfig");
         const ghToken = core.getInput("gh_token");
         const dockerImage = core.getInput("docker_image");
-        const envFilePath = core.getInput("env_file"); // Path to environment variables file
+        const envVarsInput = core.getInput("env_vars"); // Path to environment variables file
         const runMode = core.getInput("run_mode");
         const dockerUsername = core.getInput("docker_username");
         const withIngress = core.getInput("with_ingress");
@@ -28084,11 +28084,10 @@ async function run() {
         // Create or update Docker registry secret
         await exec.exec(`sh -c "kubectl create secret docker-registry ghcr-secret --docker-server=ghcr.io --docker-username=${dockerUsername} --docker-password=${ghToken} --namespace=${namespace} --dry-run=client -o yaml | kubectl apply -f -"`, [], { shell: true });
         // Read environment variables from file
-        const envFileContent = fs.readFileSync(envFilePath, "utf-8");
-        const envVars = envFileContent
-            .split("\n")
-            .filter((line) => line.trim() !== "")
-            .map((line) => line.trim());
+        const envVars = envVarsInput.split("\n").map((env) => {
+            const [name, value] = env.split("=");
+            return { name, value };
+        });
         // Create or update the secret for the environment variables
         const secretName = `env-vars-${service_name}`;
         // Delete existing secret if it exists
@@ -28096,7 +28095,7 @@ async function run() {
         let secretCommand = `kubectl create secret generic ${secretName} --namespace=${namespace}`;
         envVars.forEach((envVar) => {
             const [name, value] = envVar.split("=");
-            secretCommand += ` --from-literal=${name}=${JSON.stringify(value).slice(1, -1)}`;
+            secretCommand += ` --from-literal=${name}=${value}`;
         });
         // Execute the command to create the secret
         await exec.exec(`sh -c "${secretCommand} --dry-run=client -o yaml | kubectl apply -f -"`, [], { shell: true });

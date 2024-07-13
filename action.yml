@@ -22,7 +22,7 @@ inputs:
   docker_image:
     description: "Docker Image url"
     required: true
-  env_file:
+  env_vars:
     description: "Environment Variables (format: ENV_NAME=value,ENV_NAME=value)"
     required: false
   with_ingress:

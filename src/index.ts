@@ -11,7 +11,7 @@ async function run() {
     const kubeconfig = core.getInput("kubeconfig");
     const ghToken = core.getInput("gh_token");
     const dockerImage = core.getInput("docker_image");
-    const envFilePath = core.getInput("env_file"); // Path to environment variables file
+    const envVarsInput = core.getInput("env_vars"); // Path to environment variables file
     const runMode = core.getInput("run_mode");
     const dockerUsername = core.getInput("docker_username");
     const withIngress = core.getInput("with_ingress");
@@ -41,11 +41,11 @@ async function run() {
     );
 
     // Read environment variables from file
-    const envFileContent = fs.readFileSync(envFilePath, "utf-8");
-    const envVars = envFileContent
-      .split("\n")
-      .filter((line: any) => line.trim() !== "")
-      .map((line: any) => line.trim());
+
+    const envVars = envVarsInput.split("\n").map((env: string) => {
+      const [name, value] = env.split("=");
+      return { name, value };
+    });
 
     // Create or update the secret for the environment variables
     const secretName = `env-vars-${service_name}`;
@@ -58,10 +58,7 @@ async function run() {
 
     envVars.forEach((envVar: any) => {
       const [name, value] = envVar.split("=");
-      secretCommand += ` --from-literal=${name}=${JSON.stringify(value).slice(
-        1,
-        -1
-      )}`;
+      secretCommand += ` --from-literal=${name}=${value}`;
     });
 
     // Execute the command to create the secret
