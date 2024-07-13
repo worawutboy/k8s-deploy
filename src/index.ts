@@ -57,7 +57,7 @@ async function run() {
     let secretCommand = `kubectl create secret generic ${secretName} --namespace=${namespace}`;
 
     envVars.forEach((envVar: any) => {
-      const [name, value] = envVar.split("=");
+      const { name, value } = envVar;
       secretCommand += ` --from-literal=${name}=${value}`;
     });
 
