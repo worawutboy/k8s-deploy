@@ -11,7 +11,7 @@ async function run() {
     const kubeconfig = core.getInput("kubeconfig");
     const ghToken = core.getInput("gh_token");
     const dockerImage = core.getInput("docker_image");
-    const envVarsInput = core.getInput("env_vars");
+    const envFilePath = core.getInput("env_file"); // Path to environment variables file
     const runMode = core.getInput("run_mode");
     const dockerUsername = core.getInput("docker_username");
     const withIngress = core.getInput("with_ingress");
@@ -40,17 +40,19 @@ async function run() {
       { shell: true }
     );
 
-    // Prepare environment variables
-    const envVars = envVarsInput.split(",").map((env: any) => {
-      const [name, value] = env.split("=");
-      return { name, value };
-    });
+    // Read environment variables from file
+    const envFileContent = fs.readFileSync(envFilePath, "utf-8");
+    const envVars = envFileContent
+      .split("\n")
+      .filter((line: any) => line.trim() !== "")
+      .map((line: any) => line.trim());
+
     // Create a secret for the environment variables
     const secretName = `env-vars-${service_name}`;
     let secretCommand = `kubectl create secret generic ${secretName} --namespace=${namespace}`;
 
     envVars.forEach((envVar: any) => {
-      secretCommand += ` --from-literal=${envVar.name}=${envVar.value}`;
+      secretCommand += ` --from-literal=${envVar}`;
     });
 
     // Execute the command to create the secret
