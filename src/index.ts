@@ -15,6 +15,7 @@ async function run() {
     const runMode = core.getInput("run_mode");
     const dockerUsername = core.getInput("docker_username");
     const withIngress = core.getInput("with_ingress");
+    const containerPort = core.getInput("container_port");
     if (withIngress === "true" && !host) {
       throw new Error("Host is required when with_ingress is true");
     }
@@ -96,7 +97,7 @@ spec:
         - name: ${service_name}
           image: ${dockerImage}
           ports:
-            - containerPort: 3000
+            - containerPort: ${containerPort}
           envFrom:
             - secretRef:
                 name: ${secretName}
@@ -115,7 +116,7 @@ spec:
   ports:
     - protocol: TCP
       port: 80
-      targetPort: 3000
+      targetPort: ${containerPort}
   type: ClusterIP
 `;
 

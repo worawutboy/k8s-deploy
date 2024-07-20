@@ -33,6 +33,10 @@ inputs:
     description: "Run mode"
     required: false
     default: "production"
+  container_port:
+    description: "Container Port"
+    required: false
+    default: "3000"
 
 runs:
   using: "node16"
