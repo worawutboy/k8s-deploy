@@ -28071,6 +28071,7 @@ async function run() {
         const runMode = core.getInput("run_mode");
         const dockerUsername = core.getInput("docker_username");
         const withIngress = core.getInput("with_ingress");
+        const containerPort = core.getInput("container_port");
         if (withIngress === "true" && !host) {
             throw new Error("Host is required when with_ingress is true");
         }
@@ -28085,7 +28086,12 @@ async function run() {
         await exec.exec(`sh -c "kubectl create secret docker-registry ghcr-secret --docker-server=ghcr.io --docker-username=${dockerUsername} --docker-password=${ghToken} --namespace=${namespace} --dry-run=client -o yaml | kubectl apply -f -"`, [], { shell: true });
         // Read environment variables from file
         const envVars = envVarsInput.split("\n").map((env) => {
-            const [name, value] = env.split("=");
+            //get first index of = to avoid splitting on values
+            const indexOfEqual = env.indexOf("=");
+            const [name, value] = [
+                env.slice(0, indexOfEqual),
+                env.slice(indexOfEqual + 1),
+            ];
             return { name, value };
         });
         // Create or update the secret for the environment variables
@@ -28124,7 +28130,7 @@ spec:
         - name: ${service_name}
           image: ${dockerImage}
           ports:
-            - containerPort: 3000
+            - containerPort: ${containerPort}
           envFrom:
             - secretRef:
                 name: ${secretName}
@@ -28142,7 +28148,7 @@ spec:
   ports:
     - protocol: TCP
       port: 80
-      targetPort: 3000
+      targetPort: ${containerPort}
   type: ClusterIP
 `;
         // Create ingress YAML

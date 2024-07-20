@@ -44,7 +44,12 @@ async function run() {
     // Read environment variables from file
 
     const envVars = envVarsInput.split("\n").map((env: string) => {
-      const [name, value] = env.split("=");
+      //get first index of = to avoid splitting on values
+      const indexOfEqual = env.indexOf("=");
+      const [name, value] = [
+        env.slice(0, indexOfEqual),
+        env.slice(indexOfEqual + 1),
+      ];
       return { name, value };
     });
 
