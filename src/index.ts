@@ -21,11 +21,11 @@ async function run() {
     }
 
     // Set up kubeconfig if not exists in the runner machine created by the action
-    if (!fs.existsSync("/home/runner/.kube")) {
-      fs.mkdirSync("/home/runner/.kube");
+    if (!fs.existsSync("~/.kube")) {
+      fs.mkdirSync("~/.kube");
     }
     fs.writeFileSync(
-      "/home/runner/.kube/config",
+      "~/.kube/config",
       Buffer.from(kubeconfig, "base64").toString("utf8")
     );
 
